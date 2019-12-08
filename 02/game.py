@@ -2,9 +2,9 @@
 # Code Challenge 02 - Word Values Part II - a simple game
 # http://pybit.es/codechallenge02.html
 
+import itertools
+import random
 from data import DICTIONARY, LETTER_SCORES, POUCH
-from random import randint
-from itertools import permutations
 
 NUM_LETTERS = 7
 
@@ -18,11 +18,14 @@ def max_word_value(words):
     """Calc the max value of a collection of words"""
     return max(words, key=calc_word_value)
 
-
-def draw_letters():
-    return [POUCH.pop(randint(0, len(POUCH)-1)) for _ in range(7)]
+def draw_letters(n):
+    #p = list(POUCH)
+    #return [p.pop(random.randint(0, len(p)-1)) for _ in range(n)]
+    return random.sample(POUCH, n)
 
 def validate(word, letters):
+    # NOTE: there's a bug, user can use any letter more times than it's been drawn!
+    # should check if letters counts in word are same as in letters list
     return all(l in letters for l in word) and word.lower() in DICTIONARY
 
 def ask_for_player_word(letters):
@@ -35,20 +38,20 @@ def ask_for_player_word(letters):
 def find_max_scored_word(letters):
     # words = set()
     # for n in range(1, len(letters)+1):
-    #     for it in permutations(letters, n):
+    #     for it in itertools.permutations(letters, n):
     #         word = "".join(it)
     #         if (validate(word, letters)):
     #             words.add(word)
     words = { "".join(it)
                 for n in range(1, len(letters)+1)
-                for it in permutations(letters, n)
+                for it in itertools.permutations(letters, n)
                 if validate("".join(it), letters)
             }
     return max_word_value(words)
 
-def main():
-    drawn_letters = draw_letters()
-    word = ask_for_player_word(drawn_letters)
+def game():
+    drawn_letters = draw_letters(7)
+    word = ask_for_player_word(sorted(drawn_letters))
     score = calc_word_value(word)
     print(f"Your word is worth {score} points.")
 
@@ -60,6 +63,15 @@ def main():
         print("GOOD JOB!")
     else:
         print(f"You are {max_score-score} behind... Better luck next time!")
+
+
+def main():
+    while True:
+        game()
+        print("\nOne more time? (y/n)")
+        if input().strip().lower() != "y":
+            break
+        print()
 
 if __name__ == "__main__":
     main()
